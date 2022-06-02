@@ -1,0 +1,70 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Wet bulb global temperature 
+
+less than 82F (green) Normal activities: Provide at least three separate rest breaks each hour with a minimum duration of 3 min each during the workout.
+
+82-87F (yellow) Less than ideal: Use discretion for intense or prolonged exercise; Provide at least three separate rest breaks each hour with a minimum duration of 4 min each.
+
+87-90F (orange) Moderate risk: Maximum practice time is 2 h. For Football: players are restricted to helmet, shoulder pads, and shorts during practice. If the WBGT rises to this level during practice, players may continue to work out wearing football pants without changing to shorts. For All Sports: Provide at least four separate rest breaks each hour with a minimum duration of 4 min each.
+
+90-92F (red) High risk for heat illness: Maximum practice time is 1 h. For Football: No protective equipment may be worn during practice, and there may be no conditioning activities. For All Sports: There must be 20 min of rest breaks distributed throughout the hour of practice.
+
+over 92F (black) Extreme conditions, no outdoor workouts. Delay practice until a cooler WBGT is reached or move to an indoor air conditioned environment.
+
+SAIL High School WeatherSTEM data
+latitude: 30.4353,longitude: -84.3165
+
+https://leon.weatherstem.com/data
+
+Variables (units)
+10 Minute Wind Gust (mph)
+Anemometer (mph)
+Barometer (inches of Mercury)
+Dewpoint (F)
+Heat Index (F)
+Hygrometer (% RH)
+Thermometer (F)
+UV Radiation Sensor (UV Index)
+WBGT (F)
+Wind Vane (degrees)
+
+Read the csv file.
+```{r}
+HourlyMax.df <- readr::read_csv(here::here("data", "SAIL_HS.csv"),
+                                na = "null") |>
+  dplyr::rename(Gust = `10 Minute Wind Gust`,
+                HeatIndex = `Heat Index`,
+                UVIndex = `UV Radiation Sensor`,
+                WBGT = `Wet Bulb Globe Temperature`,
+                WindDirection = `Wind Vane`) |>
+  dplyr::filter(!is.na(WBGT)) |>
+  dplyr::mutate(Hour = lubridate::hour(Timestamp))
+
+dplyr::glimpse(HourlyMax.df)
+```
+
+Only hours where WBGT >= 82F
+```{r}
+df <- HourlyMax.df |>
+  dplyr::filter(WBGT >= 82)
+```
+
+9392/66349 * 100 = 14.1% of all hours
+
+What hour has the most >= 82F WBGT?
+```{r}
+library(ggplot2)
+
+df |> 
+  dplyr::group_by(Hour) |>
+  dplyr::summarize(nTimes = sum(WBGT >= 82)) |>
+ggplot(mapping = aes(x = Hour, y = nTimes)) +
+  geom_col() +
+  theme_minimal()
+```
+
+Answer: 1-2p
