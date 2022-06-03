@@ -55,16 +55,46 @@ df <- HourlyMax.df |>
 
 9392/66349 * 100 = 14.1% of all hours
 
-What hour has the most >= 82F WBGT?
+What hour has the most >= 92F WBGT?
 ```{r}
 library(ggplot2)
 
 df |> 
   dplyr::group_by(Hour) |>
-  dplyr::summarize(nTimes = sum(WBGT >= 82)) |>
+  dplyr::summarize(nTimes = sum(WBGT >= 92)) |>
 ggplot(mapping = aes(x = Hour, y = nTimes)) +
   geom_col() +
   theme_minimal()
 ```
 
 Answer: 1-2p
+
+What variables are the most correlated with WBGT for WBGT >= 92?
+
+```{r}
+df2 <- df |>
+  dplyr::filter(WBGT >= 92)
+
+cor.test(df2$WBGT, df2$HeatIndex)
+```
+
+The heat index is the variable most strongly correlated with WBGT over the range of WBGT greater than 82F.
+
+What is the most common WBGT >= 82F?
+```{r}
+library(ggplot2)
+
+df |> 
+  dplyr::mutate(WBGTr = floor(WBGT)) |>
+  dplyr::group_by(WBGTr) |>
+  dplyr::summarize(nTimes = dplyr::n()) |>
+ggplot(mapping = aes(x = WBGTr, y = nTimes)) +
+  geom_col() +
+  theme_minimal()
+```
+
+```{r}
+df |>
+  dplyr::filter(WBGT > 94) |>
+  dplyr::select(Timestamp, WBGT)
+```
